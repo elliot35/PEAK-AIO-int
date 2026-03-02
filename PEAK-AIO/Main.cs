@@ -19,6 +19,7 @@ public class PeakMod : BaseUnityPlugin
 {
     // Menu
     private bool styleApplied = false;
+    private bool fontsLoaded = false;
     private bool showMenu = false;
     private int selectedTab = 1;
     private static readonly FieldInfo cursorVisibleField = typeof(DearImGuiInjection.DearImGuiInjection)
@@ -104,6 +105,70 @@ public class PeakMod : BaseUnityPlugin
         style.FrameBorderSize = 1.0f;
         style.ItemSpacing = new System.Numerics.Vector2(2, 4);
     }
+
+    private unsafe void LoadCJKFonts()
+    {
+        try
+        {
+            var io = ImGui.GetIO();
+            var fonts = io.Fonts;
+
+            fonts.Clear();
+            fonts.AddFontDefault();
+
+            float fontSize = 13.0f;
+
+            ImFontConfigPtr mergeConfig = new ImFontConfigPtr(ImGuiNative.ImFontConfig_ImFontConfig());
+            mergeConfig.MergeMode = true;
+            mergeConfig.PixelSnapH = true;
+
+            string msyhPath = @"C:\Windows\Fonts\msyh.ttc";
+            if (System.IO.File.Exists(msyhPath))
+            {
+                fonts.AddFontFromFileTTF(msyhPath, fontSize, mergeConfig, fonts.GetGlyphRangesChineseFull());
+                fonts.AddFontFromFileTTF(msyhPath, fontSize, mergeConfig, fonts.GetGlyphRangesJapanese());
+            }
+
+            string malgunPath = @"C:\Windows\Fonts\malgun.ttf";
+            if (System.IO.File.Exists(malgunPath))
+            {
+                fonts.AddFontFromFileTTF(malgunPath, fontSize, mergeConfig, fonts.GetGlyphRangesKorean());
+            }
+
+            fonts.Build();
+            mergeConfig.Destroy();
+
+            var assembly = typeof(DearImGuiInjection.DearImGuiInjection).Assembly;
+            var implType = assembly.GetType("DearImGuiInjection.Backends.ImGuiDX11Impl")
+                        ?? assembly.GetType("DearImGuiInjection.Backends.ImGuiDX12Impl");
+
+            if (implType != null)
+            {
+                var samplerField = implType.GetField("_fontSampler", BindingFlags.NonPublic | BindingFlags.Static);
+                if (samplerField != null)
+                {
+                    var oldSampler = samplerField.GetValue(null) as IDisposable;
+                    oldSampler?.Dispose();
+                    samplerField.SetValue(null, null);
+                }
+
+                var rvField = implType.GetField("_fontResourceView", BindingFlags.NonPublic | BindingFlags.Static);
+                if (rvField != null)
+                {
+                    var oldRv = rvField.GetValue(null) as IDisposable;
+                    oldRv?.Dispose();
+                    rvField.SetValue(null, null);
+                }
+            }
+
+            Logger.LogInfo("[PEAK AIO] CJK fonts loaded successfully.");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning("[PEAK AIO] Failed to load CJK fonts: " + ex);
+        }
+    }
+
     private void Awake()
     {
         Logger.LogInfo("Mod Initialized");
@@ -233,6 +298,13 @@ public class PeakMod : BaseUnityPlugin
     {
         try
         {
+            if (!fontsLoaded)
+            {
+                LoadCJKFonts();
+                fontsLoaded = true;
+                return;
+            }
+
             if (!showMenu)
                 return;
 
