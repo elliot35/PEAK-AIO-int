@@ -1,4 +1,6 @@
-<img width="539" height="339" alt="屏幕截图 2026-03-03 023947" src="https://github.com/user-attachments/assets/94fcbccf-5833-4e3f-8beb-6d5709f11481" /># PEAK AIO Mod
+<img width="539" height="339" alt="屏幕截图 2026-03-03 023947" src="https://github.com/user-attachments/assets/94fcbccf-5833-4e3f-8beb-6d5709f11481" />
+
+# PEAK AIO Mod
 
 [![Stars](https://img.shields.io/github/stars/elliot35/PEAK-AIO-int?style=flat)](https://github.com/elliot35/PEAK-AIO-int/stargazers)
 [![Forks](https://img.shields.io/github/forks/elliot35/PEAK-AIO-int?style=flat)](https://github.com/elliot35/PEAK-AIO-int/network/members)
