@@ -131,23 +131,35 @@ public static class CJKFontPatch
             string msyhPath = @"C:\Windows\Fonts\msyh.ttc";
             if (System.IO.File.Exists(msyhPath))
             {
-                fonts.AddFontFromFileTTF(msyhPath, fontSize, mergeConfig, fonts.GetGlyphRangesChineseFull());
-                fonts.AddFontFromFileTTF(msyhPath, fontSize, mergeConfig, fonts.GetGlyphRangesJapanese());
+                var f1 = fonts.AddFontFromFileTTF(msyhPath, fontSize, mergeConfig, fonts.GetGlyphRangesChineseFull());
+                ConfigManager.Logger.LogInfo($"[PEAK AIO] Chinese font: {(f1.NativePtr != null ? "OK" : "FAILED")}");
+                var f2 = fonts.AddFontFromFileTTF(msyhPath, fontSize, mergeConfig, fonts.GetGlyphRangesJapanese());
+                ConfigManager.Logger.LogInfo($"[PEAK AIO] Japanese font: {(f2.NativePtr != null ? "OK" : "FAILED")}");
+            }
+            else
+            {
+                ConfigManager.Logger.LogWarning("[PEAK AIO] msyh.ttc NOT FOUND");
             }
 
             string malgunPath = @"C:\Windows\Fonts\malgun.ttf";
             if (System.IO.File.Exists(malgunPath))
             {
-                fonts.AddFontFromFileTTF(malgunPath, fontSize, mergeConfig, fonts.GetGlyphRangesKorean());
+                var f3 = fonts.AddFontFromFileTTF(malgunPath, fontSize, mergeConfig, fonts.GetGlyphRangesKorean());
+                ConfigManager.Logger.LogInfo($"[PEAK AIO] Korean font: {(f3.NativePtr != null ? "OK" : "FAILED")}");
+            }
+            else
+            {
+                ConfigManager.Logger.LogWarning("[PEAK AIO] malgun.ttf NOT FOUND");
             }
 
             mergeConfig.Destroy();
 
-            ConfigManager.Logger.LogInfo("[PEAK AIO] CJK font configs registered.");
+            bool built = fonts.Build();
+            ConfigManager.Logger.LogInfo($"[PEAK AIO] Atlas build: {(built ? "OK" : "FAILED")}, size: {fonts.TexWidth}x{fonts.TexHeight}, fonts: {fonts.Fonts.Size}");
         }
         catch (Exception ex)
         {
-            ConfigManager.Logger.LogWarning("[PEAK AIO] CJK font config failed: " + ex.Message);
+            ConfigManager.Logger.LogWarning("[PEAK AIO] CJK font loading failed: " + ex.Message);
         }
     }
 }

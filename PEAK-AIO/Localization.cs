@@ -500,10 +500,10 @@ public static class Localization
             { Language.Korean, "버전: 1.0.8" }
         }},
         { "about.author", new Dictionary<Language, string> {
-            { Language.English, "Author: OniGremlin" },
-            { Language.SimplifiedChinese, "作者: OniGremlin" },
-            { Language.Japanese, "作者: OniGremlin" },
-            { Language.Korean, "제작자: OniGremlin" }
+            { Language.English, "Author: K1rito (Inspired by OniGremlin)" },
+            { Language.SimplifiedChinese, "作者: K1rito (启发于OniGremlin)" },
+            { Language.Japanese, "作者: K1rito (OniGremlin からインスパイア)" },
+            { Language.Korean, "제작자: K1rito (OniGremlin 에서 영감)" }
         }},
         { "about.description", new Dictionary<Language, string> {
             { Language.English, "PEAK AIO is a quality-of-life and utility mod designed for the game PEAK. It brings together a wide range of player enhancements, inventory tools, world manipulation, and lobby control features in one sleek ImGui-powered interface." },
