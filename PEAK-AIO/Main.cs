@@ -21,6 +21,8 @@ public class PeakMod : BaseUnityPlugin
     private bool styleApplied = false;
     private bool showMenu = false;
     private int selectedTab = 1;
+    private static readonly FieldInfo cursorVisibleField = typeof(DearImGuiInjection.DearImGuiInjection)
+        .GetField("<IsCursorVisible>k__BackingField", BindingFlags.Static | BindingFlags.NonPublic);
 
     private void ApplyCustomStyle()
     {
@@ -128,10 +130,10 @@ public class PeakMod : BaseUnityPlugin
 
     private void Update()
     {
-        if (Input.GetKeyDown(ConfigManager.MenuToggleKey.Value))
+        if (UnityEngine.Input.GetKeyDown(ConfigManager.MenuToggleKey.Value))
         {
             showMenu = !showMenu;
-            DearImGuiInjection.DearImGuiInjection.IsCursorVisible = showMenu;
+            cursorVisibleField?.SetValue(null, showMenu);
         }
     }
 
