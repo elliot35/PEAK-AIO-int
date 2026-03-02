@@ -2,6 +2,7 @@ using HarmonyLib;
 using ImGuiNET;
 using Photon.Pun;
 using System;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 [HarmonyPatch(typeof(PointPinger), "ReceivePoint_Rpc")]
@@ -110,6 +111,20 @@ public class FlyPatch
 public static class CJKFontPatch
 {
     private static bool fontsLoaded = false;
+    private static GCHandle rangesHandle;
+
+    // Combined glyph ranges: Latin + CJK + Hiragana/Katakana + Hangul
+    private static readonly ushort[] CombinedRanges = {
+        0x0020, 0x00FF, // Basic Latin + Latin-1 Supplement
+        0x2000, 0x206F, // General Punctuation
+        0x3000, 0x30FF, // CJK Symbols, Hiragana, Katakana
+        0x3131, 0x3163, // Korean Alphabets (Jamo)
+        0x31F0, 0x31FF, // Katakana Phonetic Extensions
+        0x4E00, 0x9FFF, // CJK Unified Ideographs
+        0xAC00, 0xD7A3, // Hangul Syllables
+        0xFF00, 0xFFEF, // Halfwidth/Fullwidth Forms
+        0x0000          // Null terminator
+    };
 
     public static unsafe void Prefix()
     {
@@ -121,44 +136,32 @@ public static class CJKFontPatch
             var io = ImGui.GetIO();
             var fonts = io.Fonts;
 
-            fonts.AddFontDefault();
-
-            float fontSize = 13.0f;
-            ImFontConfigPtr mergeConfig = new ImFontConfigPtr(ImGuiNative.ImFontConfig_ImFontConfig());
-            mergeConfig.MergeMode = true;
-            mergeConfig.PixelSnapH = true;
+            // Pin the glyph ranges so the pointer survives until Build()
+            rangesHandle = GCHandle.Alloc(CombinedRanges, GCHandleType.Pinned);
+            IntPtr rangesPtr = rangesHandle.AddrOfPinnedObject();
 
             string msyhPath = @"C:\Windows\Fonts\msyh.ttc";
             if (System.IO.File.Exists(msyhPath))
             {
-                var f1 = fonts.AddFontFromFileTTF(msyhPath, fontSize, mergeConfig, fonts.GetGlyphRangesChineseFull());
-                ConfigManager.Logger.LogInfo($"[PEAK AIO] Chinese font: {(f1.NativePtr != null ? "OK" : "FAILED")}");
-                var f2 = fonts.AddFontFromFileTTF(msyhPath, fontSize, mergeConfig, fonts.GetGlyphRangesJapanese());
-                ConfigManager.Logger.LogInfo($"[PEAK AIO] Japanese font: {(f2.NativePtr != null ? "OK" : "FAILED")}");
+                // Load msyh.ttc as the sole font — it covers Latin, Chinese,
+                // Japanese kana/kanji, and Korean Hangul. No merge mode needed.
+                var cjkFont = fonts.AddFontFromFileTTF(msyhPath, 14.0f, default, rangesPtr);
+                ConfigManager.Logger.LogInfo($"[PEAK AIO] CJK primary font (msyh): {(cjkFont.NativePtr != null ? "OK" : "FAILED")}");
             }
             else
             {
-                ConfigManager.Logger.LogWarning("[PEAK AIO] msyh.ttc NOT FOUND");
+                fonts.AddFontDefault();
+                ConfigManager.Logger.LogWarning("[PEAK AIO] msyh.ttc not found, using default font.");
             }
-
-            string malgunPath = @"C:\Windows\Fonts\malgun.ttf";
-            if (System.IO.File.Exists(malgunPath))
-            {
-                var f3 = fonts.AddFontFromFileTTF(malgunPath, fontSize, mergeConfig, fonts.GetGlyphRangesKorean());
-                ConfigManager.Logger.LogInfo($"[PEAK AIO] Korean font: {(f3.NativePtr != null ? "OK" : "FAILED")}");
-            }
-            else
-            {
-                ConfigManager.Logger.LogWarning("[PEAK AIO] malgun.ttf NOT FOUND");
-            }
-
-            mergeConfig.Destroy();
 
             bool built = fonts.Build();
             ConfigManager.Logger.LogInfo($"[PEAK AIO] Atlas build: {(built ? "OK" : "FAILED")}, size: {fonts.TexWidth}x{fonts.TexHeight}, fonts: {fonts.Fonts.Size}");
+
+            if (rangesHandle.IsAllocated) rangesHandle.Free();
         }
         catch (Exception ex)
         {
+            if (rangesHandle.IsAllocated) rangesHandle.Free();
             ConfigManager.Logger.LogWarning("[PEAK AIO] CJK font loading failed: " + ex.Message);
         }
     }
