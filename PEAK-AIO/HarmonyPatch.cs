@@ -136,15 +136,16 @@ public static class CJKFontPatch
             var io = ImGui.GetIO();
             var fonts = io.Fonts;
 
-            // Pin the glyph ranges so the pointer survives until Build()
+            // Clear any pre-existing fonts added by DearImGuiInjection during InitImGui().
+            // At this point no GPU texture exists yet, so this is safe.
+            fonts.Clear();
+
             rangesHandle = GCHandle.Alloc(CombinedRanges, GCHandleType.Pinned);
             IntPtr rangesPtr = rangesHandle.AddrOfPinnedObject();
 
             string msyhPath = @"C:\Windows\Fonts\msyh.ttc";
             if (System.IO.File.Exists(msyhPath))
             {
-                // Load msyh.ttc as the sole font — it covers Latin, Chinese,
-                // Japanese kana/kanji, and Korean Hangul. No merge mode needed.
                 var cjkFont = fonts.AddFontFromFileTTF(msyhPath, 14.0f, default, rangesPtr);
                 ConfigManager.Logger.LogInfo($"[PEAK AIO] CJK primary font (msyh): {(cjkFont.NativePtr != null ? "OK" : "FAILED")}");
             }
