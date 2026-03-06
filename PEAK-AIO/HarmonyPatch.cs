@@ -265,18 +265,19 @@ public static class ImGuiInputPatch
             var winSize = ImGui.GetWindowSize();
             bool winHovered = ImGui.IsWindowHovered(ImGuiHoveredFlags.RootAndChildWindows | ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
             bool anyItemHovered = ImGui.IsAnyItemHovered();
-            int activeWins = io.MetricsActiveWindows;
+            bool winFocused = ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows);
+            bool rectHover = ImGui.IsMouseHoveringRect(
+                winPos,
+                new System.Numerics.Vector2(winPos.X + winSize.X, winPos.Y + winSize.Y),
+                false);
 
             if (cachedLButton)
             {
                 renderLogFrames++;
-                bool isClicked = ImGui.IsMouseClicked(ImGuiMouseButton.Left);
-                bool isDown = ImGui.IsMouseDown(ImGuiMouseButton.Left);
-
                 ConfigManager.Logger.LogInfo(
-                    $"[InputPatch-Render] CLICK clicked={isClicked} isDown={isDown} " +
-                    $"winHovered={winHovered} itemHovered={anyItemHovered} " +
-                    $"activeWindows={activeWins} " +
+                    $"[InputPatch-Render] CLICK " +
+                    $"winHovered={winHovered} rectHover={rectHover} winFocused={winFocused} " +
+                    $"wantCapture={io.WantCaptureMouse} configFlags=0x{(int)io.ConfigFlags:X} " +
                     $"imguiPos=({io.MousePos.X:F0},{io.MousePos.Y:F0}) " +
                     $"winPos=({winPos.X:F0},{winPos.Y:F0}) winSize=({winSize.X:F0},{winSize.Y:F0})");
             }
@@ -284,8 +285,9 @@ public static class ImGuiInputPatch
             {
                 renderLogFrames++;
                 ConfigManager.Logger.LogInfo(
-                    $"[InputPatch-Render] winHovered={winHovered} itemHovered={anyItemHovered} " +
-                    $"activeWindows={activeWins} " +
+                    $"[InputPatch-Render] " +
+                    $"winHovered={winHovered} rectHover={rectHover} winFocused={winFocused} " +
+                    $"wantCapture={io.WantCaptureMouse} configFlags=0x{(int)io.ConfigFlags:X} " +
                     $"imguiPos=({io.MousePos.X:F0},{io.MousePos.Y:F0}) " +
                     $"winPos=({winPos.X:F0},{winPos.Y:F0}) winSize=({winSize.X:F0},{winSize.Y:F0})");
             }
