@@ -14,7 +14,7 @@
 ![Italiano](https://img.shields.io/badge/lang-Italiano-brightgreen)
 [![Thunderstore](https://img.shields.io/thunderstore/v/k1r_gamer/PEAK_AIO_APEX?style=flat&label=Thunderstore)](https://thunderstore.io/c/peak/p/k1r_gamer/PEAK_AIO_APEX/)
 
-An all-in-one mod menu for [PEAK](https://store.steampowered.com/app/2873498/PEAK/) that brings together player enhancements, inventory tools, teleportation, world interaction, and lobby control in a clean, tabbed ImGui interface. Inspired by PEAK-AIO.
+An all-in-one mod menu for [PEAK](https://store.steampowered.com/app/3527290/PEAK/) that brings together player enhancements, inventory tools, teleportation, world interaction, and lobby control in a clean, tabbed ImGui interface. Inspired by PEAK-AIO.
 
 Supports **English**, **简体中文**, **日本語**, **한국어**, and **Italiano**.
 
