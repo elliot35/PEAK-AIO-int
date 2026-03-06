@@ -174,18 +174,7 @@ public class PeakMod : BaseUnityPlugin
         if (UnityEngine.Input.GetKeyDown(ConfigManager.MenuToggleKey.Value))
         {
             showMenu = !showMenu;
-        }
-
-        if (showMenu)
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-            ImGuiInputPatch.SetForceInput(true);
-            ImGuiInputPatch.CaptureInput();
-        }
-        else
-        {
-            ImGuiInputPatch.SetForceInput(false);
+            CursorHandler.Instance.isMenuScene = showMenu;
         }
     }
 
