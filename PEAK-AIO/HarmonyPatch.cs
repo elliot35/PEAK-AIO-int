@@ -126,6 +126,14 @@ public static class CJKFontPatch
         0x0000          // Null terminator
     };
 
+    private static readonly string[] FontCandidates = {
+        @"C:\Windows\Fonts\malgun.ttf",
+        @"C:\Windows\Fonts\malgunsl.ttf",
+        @"C:\Windows\Fonts\msyh.ttc",
+        @"C:\Windows\Fonts\meiryo.ttc",
+        @"C:\Windows\Fonts\yugothm.ttc",
+    };
+
     public static unsafe void Prefix()
     {
         if (fontsLoaded) return;
@@ -139,22 +147,27 @@ public static class CJKFontPatch
             rangesHandle = GCHandle.Alloc(CombinedRanges, GCHandleType.Pinned);
             IntPtr rangesPtr = rangesHandle.AddrOfPinnedObject();
 
-            string msyhPath = @"C:\Windows\Fonts\msyh.ttc";
-            if (System.IO.File.Exists(msyhPath))
+            string chosenFont = null;
+            foreach (var path in FontCandidates)
             {
-                // Add CJK font alongside DearImGuiInjection's existing default font.
-                // We can't Clear() existing fonts (crashes due to dangling internal pointers)
-                // and MergeMode doesn't work (struct layout mismatch with bundled cimgui).
-                // Instead, add as a second font and redirect all rendering to it.
-                var cjkFont = fonts.AddFontFromFileTTF(msyhPath, 14.0f, default, rangesPtr);
-                ConfigManager.Logger.LogInfo($"[PEAK AIO] CJK primary font (msyh): {(cjkFont.NativePtr != null ? "OK" : "FAILED")}");
+                if (System.IO.File.Exists(path))
+                {
+                    chosenFont = path;
+                    break;
+                }
+            }
+
+            if (chosenFont != null)
+            {
+                var cjkFont = fonts.AddFontFromFileTTF(chosenFont, 14.0f, default, rangesPtr);
+                ConfigManager.Logger.LogInfo($"[PEAK AIO] CJK font ({System.IO.Path.GetFileName(chosenFont)}): {(cjkFont.NativePtr != null ? "OK" : "FAILED")}");
 
                 if (cjkFont.NativePtr != null)
                     io.NativePtr->FontDefault = cjkFont.NativePtr;
             }
             else
             {
-                ConfigManager.Logger.LogWarning("[PEAK AIO] msyh.ttc not found, using default font.");
+                ConfigManager.Logger.LogWarning("[PEAK AIO] No suitable CJK font found, using default font.");
             }
 
             bool built = fonts.Build();
