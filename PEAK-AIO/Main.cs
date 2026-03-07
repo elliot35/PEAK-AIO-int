@@ -909,6 +909,12 @@ public class PeakMod : BaseUnityPlugin
                     {
                         bool isActive = ((int)Localization.CurrentLanguage == i);
 
+                        bool needKoreanFont = (i == (int)Language.Korean) && Localization.CurrentLanguage != Language.Korean && CJKFontPatch.HasKoreanFont;
+                        bool needCjkFont = (i == (int)Language.SimplifiedChinese || i == (int)Language.Japanese) && Localization.CurrentLanguage == Language.Korean && CJKFontPatch.HasCjkFont;
+
+                        if (needKoreanFont) ImGui.PushFont(CJKFontPatch.KoreanFont);
+                        else if (needCjkFont) ImGui.PushFont(CJKFontPatch.CjkFont);
+
                         if (isActive)
                         {
                             ImGui.PushStyleColor(ImGuiCol.Button, new System.Numerics.Vector4(0.318f, 0.569f, 0.384f, 1.0f));
@@ -923,6 +929,8 @@ public class PeakMod : BaseUnityPlugin
 
                         if (isActive)
                             ImGui.PopStyleColor(2);
+
+                        if (needKoreanFont || needCjkFont) ImGui.PopFont();
                     }
 
                     ImGui.Unindent();
