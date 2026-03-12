@@ -17,35 +17,43 @@ internal static class GameHelpers
         if (!cacheValid)
             return;
 
-        cacheValid = false;
-
-        if (character == null || !character.isActiveAndEnabled)
+        var localCharacter = Character.localCharacter;
+        if (!ReferenceEquals(character, localCharacter) ||
+            character == null ||
+            !character.isActiveAndEnabled)
         {
-            character = null;
+            Refresh();
+        }
+    }
+
+    public static Character GetCharacterComponent()
+    {
+        var localCharacter = Character.localCharacter;
+
+        if (!ReferenceEquals(character, localCharacter))
+        {
+            character = localCharacter;
+            characterData = null;
             movementComponent = null;
             afflictionsComponent = null;
             climbingComponent = null;
             vineClimbingComponent = null;
             ropeClimbingComponent = null;
         }
-    }
 
-    public static Character GetCharacterComponent()
-    {
-        if (ReferenceEquals(character, null))
-        {
-            character = Character.localCharacter;
-            cacheValid = true;
-        }
+        cacheValid = !ReferenceEquals(character, null);
         return character;
     }
 
     public static CharacterData GetCharacterData()
     {
+        var c = GetCharacterComponent();
+        if (!ReferenceEquals(c, null))
+            return c.data;
+
         if (ReferenceEquals(characterData, null))
-        {
             characterData = Object.FindFirstObjectByType<CharacterData>();
-        }
+
         return characterData;
     }
 
